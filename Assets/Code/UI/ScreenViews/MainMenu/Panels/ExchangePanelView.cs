@@ -18,23 +18,23 @@ namespace Modules.Test1C.UI.ScreenViews.MainMenu
         [SerializeField] private TMPro.TextMeshProUGUI _availableCoinsAmountTxt;
         [SerializeField] private TMPro.TextMeshProUGUI _availableCreditsAmountTxt;
         
-        public event Action<string> OnExceptClickedEvent;
-        public event Action<string> OnInputChangeEvent;
-        public event Action OnPanelHiddenEvent;
-
-        private void Start()
+        public void InitClickHandlers(Action<string> onExceptClickedAction, Action<string> onInputChangeAction, Action onPanelHideClickedAction)
         {
             _exceptBtn.onClick.AddListener(() =>
             {
-                OnExceptClickedEvent?.Invoke(_coinsAmountInputF.text);
+                onExceptClickedAction?.Invoke(_coinsAmountInputF.text);
             });
             
             _coinsAmountInputF.onValueChanged.AddListener(value =>
             {
-                OnInputChangeEvent?.Invoke(value);
+                onInputChangeAction?.Invoke(value);
             });
             
-            _cancelBtn.onClick.AddListener(HidePanel);
+            _cancelBtn.onClick.AddListener(() =>
+            {
+                onPanelHideClickedAction?.Invoke();
+                HidePanel();
+            });
         }
         
         public void InitTextInfo(int coinToCreditRate)
@@ -55,6 +55,11 @@ namespace Modules.Test1C.UI.ScreenViews.MainMenu
             _coinsAmountInputF.text = $"{value}";
         }
         
+        public void SetCoinsExchangeInputFieldValue(string value)
+        {
+            _coinsAmountInputF.text = $"{value}";
+        }
+        
         public void SetCreditsForCoinsAmount(int creditsAmount)
         {
             _creditForCoinsAmountTxt.text = $"{creditsAmount}";
@@ -68,7 +73,6 @@ namespace Modules.Test1C.UI.ScreenViews.MainMenu
         public void HidePanel()
         {
             gameObject.SetActive(false);
-            OnPanelHiddenEvent?.Invoke();
             _coinsAmountInputF.text = "";
         }
     }

@@ -1,40 +1,42 @@
 ﻿using System;
 using UnityEngine;
+using Modules.Test1C.UI.ScreenViews;
 using Modules.Test1C.UI.ScreenViews.MainMenu;
 
 namespace Modules.Test1C.UI.ScreenPresenters.MainMenu
 {
+    /// <summary>
+    /// Class responsible for providing info in view from GameModel. Operates with ui handlers
+    /// </summary>
     public class ExchangePanelPresenter
     {
-        private ExchangePanelView _exchangePanelView;
+        private readonly ExchangePanelView _exchangePanelView;
+        private readonly ILoadScreenView _loadScreenView;
         private Guid _currentOperationGuid;
-        
-        public ExchangePanelPresenter(ExchangePanelView exchangePanelView)
+
+        public ExchangePanelPresenter(ExchangePanelView exchangePanelView, ILoadScreenView loadScreenView)
         {
             _exchangePanelView = exchangePanelView;
+            _loadScreenView = loadScreenView;
 
             // event hanlers
-            _exchangePanelView.OnPanelHiddenEvent += () =>
-            {
-                GameModel.OperationComplete -= ProcessOperation;
-            };
-            
-            _exchangePanelView.OnExceptClickedEvent += inputValue =>
+            _exchangePanelView.InitClickHandlers(inputValue =>
             {
                 if(!int.TryParse(inputValue, out var amount))
                 {
                     Debug.Log($"Wrong input value {inputValue}!");
+                    _exchangePanelView.SetCoinsExchangeInputFieldValue("");
                     return;
                 }
 
+                _loadScreenView.ShowScreen();
                 _currentOperationGuid = GameModel.ConvertCoinToCredit(amount);
-            };
-
-            _exchangePanelView.OnInputChangeEvent += inputValue =>
+            }, inputValue =>
             {
                 if(!int.TryParse(inputValue, out var amount))
                 {
                     Debug.Log($"Wrong input value {inputValue}!");
+                    _exchangePanelView.SetCoinsExchangeInputFieldValue("");
                     return;
                 }
 
@@ -46,7 +48,10 @@ namespace Modules.Test1C.UI.ScreenPresenters.MainMenu
 
                 int creditsForCoinsAmount = amount * GameModel.CoinToCreditRate;
                 _exchangePanelView.SetCreditsForCoinsAmount(creditsForCoinsAmount);
-            };
+            }, () =>
+            {
+                GameModel.OperationComplete -= ProcessOperation;
+            });
             
             // init exchange rate
             _exchangePanelView.InitTextInfo(GameModel.CoinToCreditRate);
@@ -73,6 +78,8 @@ namespace Modules.Test1C.UI.ScreenPresenters.MainMenu
                     // todo: use popup for this
                     Debug.Log(result.ErrorDescription);
                 }
+                
+                _loadScreenView.HideScreen();
             }
         }
     }

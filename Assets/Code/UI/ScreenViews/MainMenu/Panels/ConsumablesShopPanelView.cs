@@ -17,16 +17,16 @@ namespace Modules.Test1C.UI.ScreenViews.MainMenu
         
         [SerializeField] private TMPro.TextMeshProUGUI _medpackPackPriceTxt;
         [SerializeField] private TMPro.TextMeshProUGUI _armorPackPriceTxt;
-
-        public event Action OnBuyMedpackClickedEvent;
-        public event Action OnBuyArmorPlateClickedEvent;
-        public event Action OnPanelHiddenEvent;
-
-        private void Start()
+        
+        public void InitClickHandlers(Action onBuyMedpackClickedAction, Action onBuyArmorPlateClickedAction, Action onPanelHideClickedAction)
         {
-            _buyMedpackBtn.onClick.AddListener(() => OnBuyMedpackClickedEvent?.Invoke());
-            _buyArmorPlateBtn.onClick.AddListener(() => OnBuyArmorPlateClickedEvent?.Invoke());
-            _closePanelBtn.onClick.AddListener(HidePanel);
+            _buyMedpackBtn.onClick.AddListener(() => onBuyMedpackClickedAction?.Invoke());
+            _buyArmorPlateBtn.onClick.AddListener(() => onBuyArmorPlateClickedAction?.Invoke());
+            _closePanelBtn.onClick.AddListener(() =>
+            {
+                onPanelHideClickedAction?.Invoke();
+                HidePanel();
+            });
         }
 
         public void InitTextInfo(int medpackInSellPackAmount, int armorPlatesInSellPackAmount, int medpackPackPrice, 
@@ -46,7 +46,6 @@ namespace Modules.Test1C.UI.ScreenViews.MainMenu
         public void HidePanel()
         {
             gameObject.SetActive(false);
-            OnPanelHiddenEvent?.Invoke();
         }
     }
 }
